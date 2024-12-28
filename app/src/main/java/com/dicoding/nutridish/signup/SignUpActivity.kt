@@ -8,6 +8,7 @@ import android.text.Spanned
 import android.text.TextUtils
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.util.Log
 import android.util.Patterns
 import android.view.View
 import android.widget.TextView
@@ -39,19 +40,24 @@ class SignUpActivity : AppCompatActivity() {
         signUpViewModel.registrationResult.observe(this) { result ->
             when (result) {
                 is Result.Success -> {
-                    Toast.makeText(this, "Pendaftaran berhasil!", Toast.LENGTH_SHORT).show()
+                    // Cek apakah result.data.message berisi string yang benar
+                    Log.d("SignUp", "Registration successful: ${result.data.message}")
+                    val message = result.data.message
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, LoginActivity::class.java))
                     finish()
                 }
                 is Result.Error -> {
-                    Toast.makeText(this, "Pendaftaran gagal: ${result.error}", Toast.LENGTH_SHORT)
-                        .show()
+                    Log.d("SignUp", "Registration failed: ${result.error}")
+                    Toast.makeText(this, "Pendaftaran gagal: ${result.error}", Toast.LENGTH_SHORT).show()
                 }
                 Result.Loading -> {
                     Toast.makeText(this, "Sedang mendaftar...", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
+
 
         // Menambahkan DatePickerDialog ke EditText
         binding.dateEditTextLayout.setOnClickListener {
@@ -117,19 +123,20 @@ class SignUpActivity : AppCompatActivity() {
             val registrationDate =
                 SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(System.currentTimeMillis())
 
-            val user = User(
+            // Panggil ViewModel dengan parameter individu
+            signUpViewModel.registerUser(
                 age = age,
-                cons_alcohol = consAlcohol,
-                cons_pork = consPork,
+                consAlcohol = consAlcohol,
+                consPork = consPork,
                 dateBirth = dateOfBirthFormatted,
                 dateReg = registrationDate,
                 email = email,
-                userId = 0,
                 userName = name,
+                password = password,
                 weight = weight
             )
-            signUpViewModel.registerUser(user)
         }
+
 
         // Membuat teks klik untuk login
         val textView = findViewById<TextView>(R.id.messageTextView)

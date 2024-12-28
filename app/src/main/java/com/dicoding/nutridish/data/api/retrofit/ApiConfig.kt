@@ -14,13 +14,14 @@ object ApiConfig {
         }
 
         val client = OkHttpClient.Builder()
-            .connectTimeout(60, TimeUnit.SECONDS)  // Increase the connection timeout
-            .readTimeout(60, TimeUnit.SECONDS)     // Increase the read timeout
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(loggingInterceptor)
             .build()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://158.140.161.26:8080/")
+            .baseUrl("https://backend-nwyn.onrender.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

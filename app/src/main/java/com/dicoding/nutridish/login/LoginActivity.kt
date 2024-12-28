@@ -47,7 +47,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        val startIndex = text.indexOf("account")
+        val startIndex = text.indexOf("account")    
         val endIndex = startIndex + "account".length
         spannableString.setSpan(clickableSpan, startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 

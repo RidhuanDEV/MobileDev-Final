@@ -6,6 +6,7 @@ import androidx.lifecycle.liveData
 import com.dicoding.nutridish.data.api.response.FileUploadResponse
 import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.data.api.response.ResponseRecipeDetail
+import com.dicoding.nutridish.data.api.response.UserRegisterResponse
 import com.dicoding.nutridish.data.api.retrofit.ApiConfig
 import com.dicoding.nutridish.data.api.retrofit.ApiService
 import com.dicoding.nutridish.data.database.entity.NutriEntity
@@ -46,21 +47,38 @@ class UserRepository private constructor(
         return nutriDao.getFavoriteNutriById(id)
     }
 
-    suspend fun registerUser(user: User): Result<Unit> {
-        return try {
-            val response = apiService.registerUser(user)
-            if (response.isSuccessful) {
-                Log.d("RegisterUser", "Pendaftaran berhasil: ${response.message()}") // Log sukses
-                Result.Success(Unit)
-            } else {
-                Log.e("RegisterUser", "Pendaftaran gagal: ${response.message()}") // Log error
-                Result.Error(Exception(response.message()).toString())
-            }
-        } catch (e: Exception) {
-            Log.e("RegisterUser", "Terjadi kesalahan: ${e.message}") // Log exception
-            Result.Error(e.toString())
+    suspend fun registerUser(
+        age: Int,
+        consAlcohol: Int,
+        consPork: Int,
+        dateBirth: String,
+        dateReg: String,
+        email: String,
+        userName: String,
+        password: String,
+        weight: Float?
+    ): UserRegisterResponse {
+        val userData = User(
+            age = age,
+            consAlcohol = consAlcohol,
+            consPork = consPork,
+            dateBirth = dateBirth,
+            dateReg = dateReg,
+            email = email,
+            userName = userName,
+            password = password,
+            weight = weight
+        )
+
+        val response = apiService.registerUser(userData)
+
+        if (!response.isSuccessful) {
+            throw Exception("Registration failed: ${response.errorBody()?.string()}")
         }
+
+        return response.body() ?: throw Exception("Response body is null")
     }
+
 
     suspend fun login(email: String, password: String): Result<Unit> {
         return try {
