@@ -33,9 +33,9 @@ class DashboardRecommendationAdapter(
         @SuppressLint("SetTextI18n")
         fun bind(event: RecipeSearchResponseItem) {
             binding.tvItemName.text = event.title
-//            Glide.with(binding.imgItemPhoto.context)
-//                .load(event.mediaCover)
-//                .into(binding.imgItemPhoto)
+            Glide.with(binding.imgItemPhoto.context)
+                .load(event.image)
+                .into(binding.imgItemPhoto)
             val itemDataList = "recipe_data_list"
             binding.cardView.setOnClickListener {
                 val context = itemView.context

@@ -27,7 +27,7 @@ interface ApiService {
     ): Response<UserRegisterResponse>
 
 
-    @GET("auth/login")
+    @POST("auth/login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<UserLoginResponse>
 
     @GET("recipes/search")

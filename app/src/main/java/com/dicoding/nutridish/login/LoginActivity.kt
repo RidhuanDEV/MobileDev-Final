@@ -6,6 +6,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -79,7 +80,7 @@ class LoginActivity : AppCompatActivity() {
                         finish()
                     }
                     is Result.Error -> {
-                        Toast.makeText(this@LoginActivity, "Login gagal: ${result.error}", Toast.LENGTH_SHORT).show()
+                        Log.d("Login", "Login failed: ${result.error}")
                     }
 
                     Result.Loading -> {

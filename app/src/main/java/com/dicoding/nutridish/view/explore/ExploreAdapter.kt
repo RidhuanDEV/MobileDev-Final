@@ -95,9 +95,8 @@ class ExploreAdapter(
             horizontalLayout.addView(imageView)
             horizontalLayout.addView(textView)
 
-// Tambahkan layout horizontal ke dalam GridLayout
+            // Tambahkan layout horizontal ke dalam GridLayout
             binding.iconGrid.addView(horizontalLayout)
-
 
             val healthyLayout = LinearLayout(binding.root.context).apply {
                 orientation = LinearLayout.HORIZONTAL
