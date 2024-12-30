@@ -1,6 +1,7 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cardView"
     android:layout_width="150dp"
     android:layout_height="250dp"
@@ -44,19 +45,24 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/imageFood" />
 
-        <!-- Grid untuk Icon -->
-        <GridLayout
-            android:id="@+id/iconGrid"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="25dp"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:columnCount="2"
-            android:paddingTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            android:layout_marginTop="5dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textFoodName" />
+            app:layout_constraintTop_toBottomOf="@+id/textFoodName">
+
+            <TextView
+                android:id="@+id/textRating"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="asda"
+                android:textAlignment="center"
+                android:textSize="12sp"
+                app:drawableStartCompat="@drawable/star" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

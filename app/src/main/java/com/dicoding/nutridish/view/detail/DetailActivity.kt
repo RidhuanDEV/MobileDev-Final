@@ -13,6 +13,7 @@
     import androidx.lifecycle.Observer
     import androidx.lifecycle.ViewModelProvider
     import androidx.lifecycle.lifecycleScope
+    import com.bumptech.glide.Glide
     import com.dicoding.nutridish.R
     import com.dicoding.nutridish.ViewModelFactory
     import com.dicoding.nutridish.data.database.entity.NutriEntity
@@ -48,9 +49,6 @@
                         nutriItem.title ?: "Data Is Missing !"
                     )
                 }
-
-//                Log.d("DetailEventActivity", "Event data: $nutriItem") // log untuk lihat data
-
             } else {
                 handleError()
             }
@@ -75,6 +73,12 @@
 
                         // Set the dish title
                         binding.dishTitle.text = data.title ?: "Default Recipe"
+
+                        // Set the image
+                        Glide.with(binding.root.context)
+                            .load(data.image)
+                            .centerCrop()
+                            .into(binding.backgroundImage)
 
                         // Set the description
                         binding.descriptionText.text = data.description ?: "No Description"

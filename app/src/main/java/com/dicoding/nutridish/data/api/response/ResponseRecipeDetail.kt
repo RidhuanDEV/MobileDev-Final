@@ -11,6 +11,9 @@ data class ResponseRecipeDetail(
 	@field:SerializedName("date")
 	val date: String? = null,
 
+	@field:SerializedName("image")
+	val image: @RawValue Any? = null,
+
 	@field:SerializedName("sodium")
 	val sodium: @RawValue Any? = null,
 

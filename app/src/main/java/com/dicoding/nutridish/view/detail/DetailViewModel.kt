@@ -57,6 +57,5 @@ class DetailViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun checkBookmark(title: String): LiveData<NutriEntity?> {
         return repository.checkBookmark(title)
-
     }
 }
