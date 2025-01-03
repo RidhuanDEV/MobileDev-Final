@@ -104,19 +104,11 @@ class UserRepository private constructor(
         userPreference.logout()
     }
 
-    suspend fun searchRecipes(query: String, filters: String?, page: Int = 1, pageSize: Int = 100): List<RecipeSearchResponseItem?>? {
+    suspend fun searchRecipes(query: String, filters: String?, page: Int, pageSize: Int): List<RecipeSearchResponseItem?>? {
         return try {
-            val response = apiService.searchRecipes(query, filters)
+            val response = apiService.searchRecipes(query, filters, page, pageSize)
             if (response.isSuccessful) {
-                val allRecipes = response.body() ?: emptyList()
-                val startIndex = (page - 1) * pageSize
-                val endIndex = minOf(startIndex + pageSize, allRecipes.size)
-
-                if (startIndex >= allRecipes.size) {
-                    emptyList() // Return empty list if page is beyond available data
-                } else {
-                    allRecipes.subList(startIndex, endIndex)
-                }
+                response.body()
             } else {
                 null
             }
@@ -125,19 +117,11 @@ class UserRepository private constructor(
         }
     }
 
-    suspend fun loadRecipes(query: String, filters: String?, page: Int = 1, pageSize: Int = 10): List<RecipeSearchResponseItem?>? {
+    suspend fun loadRecipes(query: String, filters: String?, page: Int, pageSize: Int): List<RecipeSearchResponseItem?>? {
         return try {
-            val response = apiService.searchRecipes(query, filters)
+            val response = apiService.searchRecipes(query, filters, page, pageSize)
             if (response.isSuccessful) {
-                val allRecipes = response.body() ?: emptyList()
-                val startIndex = (page - 1) * pageSize
-                val endIndex = minOf(startIndex + pageSize, allRecipes.size)
-
-                if (startIndex >= allRecipes.size) {
-                    emptyList() // Return empty list if page is beyond available data
-                } else {
-                    allRecipes.subList(startIndex, endIndex)
-                }
+                response.body()
             } else {
                 null
             }
@@ -145,19 +129,12 @@ class UserRepository private constructor(
             null
         }
     }
-    suspend fun loadRecipesToday(query: String, filters: String?, page: Int = 1, pageSize: Int = 5): List<RecipeSearchResponseItem?>? {
-        return try {
-            val response = apiService.searchRecipes(query, filters)
-            if (response.isSuccessful) {
-                val allRecipes = response.body() ?: emptyList()
-                val startIndex = (page - 1) * pageSize
-                val endIndex = minOf(startIndex + pageSize, allRecipes.size)
 
-                if (startIndex >= allRecipes.size) {
-                    emptyList() // Return empty list if page is beyond available data
-                } else {
-                    allRecipes.subList(startIndex, endIndex)
-                }
+    suspend fun loadRecipesToday(query: String, filters: String?, page: Int, pageSize: Int): List<RecipeSearchResponseItem?>? {
+        return try {
+            val response = apiService.searchRecipes(query, filters, page, pageSize)
+            if (response.isSuccessful) {
+                response.body()
             } else {
                 null
             }
@@ -165,6 +142,7 @@ class UserRepository private constructor(
             null
         }
     }
+    
 
     fun uploadImage(imageFile: File) = liveData {
         emit(Result.Loading)

@@ -31,7 +31,9 @@ interface ApiService {
     @GET("recipes/search")
     suspend fun searchRecipes(
         @Query("query") query: String,
-        @Query("filters") filters: String? = null
+        @Query("filters") filters: String? = null,
+        @Query("page") page: Int,
+        @Query("page_size") pageSize: Int
     ): Response<List<RecipeSearchResponseItem>>
 
     @GET("recipe_details/{title}/")
