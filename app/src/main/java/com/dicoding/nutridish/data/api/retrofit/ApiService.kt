@@ -18,7 +18,6 @@ import retrofit2.http.Multipart
 import retrofit2.http.Part
 import retrofit2.http.Path
 
-
 interface ApiService {
 
     @POST("auth/register")
@@ -26,14 +25,15 @@ interface ApiService {
         @Body userData: User
     ): Response<UserRegisterResponse>
 
-
     @POST("auth/login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<UserLoginResponse>
 
     @GET("recipes/search")
     suspend fun searchRecipes(
         @Query("query") query: String,
-        @Query("filters") filters: String? = null
+        @Query("filters") filters: String? = null,
+        @Query("page") page: Int,
+        @Query("page_size") pageSize: Int
     ): Response<List<RecipeSearchResponseItem>>
 
     @GET("recipe_details/{title}/")

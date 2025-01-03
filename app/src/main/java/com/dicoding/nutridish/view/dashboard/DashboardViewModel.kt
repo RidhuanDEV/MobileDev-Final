@@ -27,6 +27,7 @@ class DashboardViewModel(
     private var isAllDataLoaded = false
     private var lastQuery: String? = null
     private var lastFilters: String? = null
+    private val pageSize = 10
     val getFavoriteRecipe: LiveData<List<NutriEntity>> = repository.getBookmarkedNutri()
 
     fun getRecommendedRecipe(query: String, filters: String? = null) {
@@ -44,7 +45,7 @@ class DashboardViewModel(
         setLoading(true)
         viewModelScope.launch {
             try {
-                val result = repository.loadRecipes(query, filters, currentPage)
+                val result = repository.searchRecipes(query, filters, currentPage, pageSize)
 
                 if (result.isNullOrEmpty()) {
                     isAllDataLoaded = true
@@ -77,8 +78,7 @@ class DashboardViewModel(
         setLoading(true)
         viewModelScope.launch {
             try {
-                val result = repository.loadRecipesToday(query, filters, currentPage)
-
+                val result = repository.searchRecipes(query, filters, currentPage, pageSize)
                 if (result.isNullOrEmpty()) {
                     isAllDataLoaded = true
                 } else {
