@@ -40,15 +40,24 @@ import retrofit2.http.Query
 import java.text.SimpleDateFormat
 import java.util.*
 import android.os.Build.VERSION_CODES
+import androidx.datastore.dataStore
 import com.bumptech.glide.Glide
+import com.dicoding.nutridish.data.api.response.BreakfastItem
+import com.dicoding.nutridish.data.api.response.DinnerItem
+import com.dicoding.nutridish.data.api.response.LunchItem
+import com.dicoding.nutridish.data.api.response.MealPlan
+import com.dicoding.nutridish.data.api.response.MealPlanResponse
 import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
+import com.dicoding.nutridish.data.pref.UserPreference
+import com.dicoding.nutridish.data.pref.dataStore
 import com.dicoding.nutridish.notification.NotificationsBottomSheet
+import java.time.LocalTime
 
 class DashboardFragment : Fragment() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var auth: FirebaseAuth
-    private lateinit var firestore: FirebaseFirestore
+    private lateinit var userPreference: UserPreference
+
     private lateinit var recentlyAdapter: DashboardAdapter
     private lateinit var recommendationAdapter: DashboardRecommendationAdapter
 
@@ -64,14 +73,11 @@ class DashboardFragment : Fragment() {
         return _binding?.root
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        auth = FirebaseAuth.getInstance()
-        firestore = FirebaseFirestore.getInstance()
+        userPreference = UserPreference.getInstance(requireContext().dataStore)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
-
         setupGreeting()
         setupRecyclerView()
         setupTimeUpdates()
@@ -82,6 +88,10 @@ class DashboardFragment : Fragment() {
             getTodayRecipe()
         }
         scheduleMealNotifications()
+    }
+
+    private suspend fun getUserId(): String? {
+        return userPreference.getUserId()
     }
 
     private fun getTodayRecipe() {
@@ -123,56 +133,121 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    @RequiresApi(VERSION_CODES.O)
     private fun getRecommendedRecipes() {
         val factory = ViewModelFactory.getInstance(requireActivity())
         val viewModel: DashboardViewModel by viewModels { factory }
         recommendationAdapter = DashboardRecommendationAdapter()
-        val filters = listOf("breakfast", "lunch", "dinner")
-        val randomFilter = filters.random()
-        viewModel.getRecommendedRecipe("all", randomFilter)
 
-        viewModel.recipesRecommended.observe(viewLifecycleOwner) { recipes ->
-            if (recipes.isNullOrEmpty()) {
-                Log.d("DashboardFragment", "Recommended recipes is empty")
+        lifecycleScope.launch {
+            val userId = getUserId()
+            if (userId != null) {
+                viewModel.getRecommendedRecipe(userId) // Kirim userId ke ViewModel
+
+                viewModel.recipesRecommended.observe(viewLifecycleOwner) { recipes ->
+                    if (recipes == null) {
+                        Log.d("DashboardFragment", "Recommended recipes is empty")
+                    } else {
+                        // Dapatkan waktu sekarang dan debug waktu
+                        val currentTime = LocalTime.now()
+                        Log.d("DashboardFragment", "Current LocalTime: $currentTime")
+                        Log.d("DashboardFragment", "Current Hour: ${currentTime.hour}")
+
+                        // Tentukan meal berdasarkan waktu
+                        val value = when {
+                            currentTime.hour in 6..12 -> recipes.mealPlan?.breakfast // Ambil breakfast
+                            currentTime.hour in 13..16 -> recipes.mealPlan?.lunch     // Ambil lunch
+                            else -> recipes.mealPlan?.dinner                         // Ambil dinner
+                        }
+
+                        // Filter dan pastikan elemen sesuai tipe yang benar
+                        val items = when (value) {
+                            is List<*> -> {
+                                when {
+                                    value.firstOrNull() is BreakfastItem -> value.filterIsInstance<BreakfastItem>()
+                                    value.firstOrNull() is LunchItem -> value.filterIsInstance<LunchItem>()
+                                    value.firstOrNull() is DinnerItem -> value.filterIsInstance<DinnerItem>()
+                                    else -> emptyList() // Menghindari tipe yang tidak sesuai
+                                }
+                            }
+                            else -> emptyList<Any?>() // Menghindari jika value null atau tidak sesuai tipe
+                        }
+
+                        // Pemetaan item ke RecipeSearchResponseItem
+                        val mappedItems = items.map { item ->
+                            when (item) {
+                                is BreakfastItem -> RecipeSearchResponseItem(
+                                    title = item.title,
+                                    image = item.image,
+                                    calories = item.calories,
+                                    protein = item.protein,
+                                    sodium = item.sodium,
+                                    fat = item.fat,
+                                    directions = item.directions,
+                                    rating = item.rating,
+                                    date = item.date,
+                                    desc = item.desc.toString(),
+                                    ingredients = item.ingredients
+                                )
+                                is LunchItem -> RecipeSearchResponseItem(
+                                    title = item.title,
+                                    image = item.image,
+                                    calories = item.calories,
+                                    protein = item.protein,
+                                    sodium = item.sodium,
+                                    fat = item.fat,
+                                    directions = item.directions,
+                                    rating = item.rating,
+                                    date = item.date,
+                                    desc = item.desc,
+                                    ingredients = item.ingredients
+                                )
+                                is DinnerItem -> RecipeSearchResponseItem(
+                                    title = item.title,
+                                    image = item.image,
+                                    calories = item.calories,
+                                    protein = item.protein,
+                                    sodium = item.sodium,
+                                    fat = item.fat,
+                                    directions = item.directions,
+                                    rating = item.rating,
+                                    date = item.date,
+                                    desc = item.desc,
+                                    ingredients = item.ingredients
+                                )
+                                else -> throw IllegalArgumentException("Unsupported item type")
+                            }
+                        }
+
+                        // Submit daftar item yang telah dipetakan ke adapter
+                        recommendationAdapter.submitList(mappedItems)
+
+                        // Setup RecyclerView untuk menampilkan rekomendasi
+                        bindingSafe?.recyclerViewRecommendation?.apply {
+                            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                            adapter = recommendationAdapter
+                        }
+
+                        // Tampilkan Toast untuk indikasi bahwa rekomendasi telah dimuat
+                        Toast.makeText(requireContext(), "Recommendations Loaded", Toast.LENGTH_SHORT).show()
+                    }
+                }
             } else {
-                val items = recipes.map {
-                    RecipeSearchResponseItem(title = it?.title ?: "Unknown")
-                }
-                recommendationAdapter.submitList(items)
-
-                bindingSafe?.recyclerViewRecommendation?.apply {
-                    layoutManager =
-                        LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-                    adapter = recommendationAdapter
-                }
-
-                Toast.makeText(requireContext(), "Recommendations Loaded", Toast.LENGTH_SHORT)
-                    .show()
+                Log.e("DashboardFragment", "User ID is null")
+                Toast.makeText(requireContext(), "Gagal mendapatkan data pengguna.", Toast.LENGTH_SHORT).show()
             }
         }
 
+
+
     }
 
+
     private fun setupGreeting() {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            val userId = currentUser.uid
-            firestore.collection("users").document(userId)
-                .get()
-                .addOnSuccessListener { document ->
-                    val userName = document?.getString("userName") ?: "User"
-                    bindingSafe?.textGreeting?.text = "Hi, $userName"
-                }
-                .addOnFailureListener {
-                    Toast.makeText(
-                        requireContext(),
-                        "Gagal memuat data pengguna.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    bindingSafe?.textGreeting?.text = "Hi, User"
-                }
-        } else {
-            bindingSafe?.textGreeting?.text = "Hi, Guest"
+        bindingSafe?.textGreeting?.text = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+            in 0..11 -> "Good Morning"
+            in 12..15 -> "Good Afternoon"
+            else -> "Good Evening"
         }
     }
 
@@ -341,7 +416,7 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(VERSION_CODES.O)
     private fun scheduleMealNotifications() {
         if (!isNotificationPermissionGranted()) {
             requestNotificationPermission()

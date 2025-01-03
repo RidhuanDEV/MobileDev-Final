@@ -1,12 +1,11 @@
 package com.dicoding.nutridish.view.dashboard
 
-import android.nfc.tech.MifareUltralight.PAGE_SIZE
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dicoding.nutridish.data.UserRepository
+import com.dicoding.nutridish.data.api.response.MealPlanResponse
 import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.data.database.entity.NutriEntity
 import kotlinx.coroutines.launch
@@ -14,8 +13,8 @@ import kotlinx.coroutines.launch
 class DashboardViewModel(
     private val repository: UserRepository
 ) : ViewModel(){
-    private val _recipesRecommended = MutableLiveData<List<RecipeSearchResponseItem?>?>(mutableListOf())
-    val recipesRecommended: LiveData<List<RecipeSearchResponseItem?>?> get() = _recipesRecommended
+    private val _recipesRecommended = MutableLiveData<MealPlanResponse?>(null)
+    val recipesRecommended: LiveData<MealPlanResponse?> get() = _recipesRecommended
 
     private val _recipesToday = MutableLiveData<List<RecipeSearchResponseItem?>?>(mutableListOf())
     val recipesToday: LiveData<List<RecipeSearchResponseItem?>?> get() = _recipesToday
@@ -30,33 +29,14 @@ class DashboardViewModel(
     private val pageSize = 10
     val getFavoriteRecipe: LiveData<List<NutriEntity>> = repository.getBookmarkedNutri()
 
-    fun getRecommendedRecipe(query: String, filters: String? = null) {
-        // Reset pagination if query or filters change
-        if (query != lastQuery || filters != lastFilters) {
-            currentPage = 1
-            isAllDataLoaded = false
-            _recipesRecommended.value = mutableListOf()
-            lastQuery = query
-            lastFilters = filters
-        }
-
-        if (isAllDataLoaded) return
-
+    fun getRecommendedRecipe(id: String) {
         setLoading(true)
         viewModelScope.launch {
             try {
-                val result = repository.searchRecipes(query, filters, currentPage, pageSize)
-
-                if (result.isNullOrEmpty()) {
-                    isAllDataLoaded = true
-                } else {
-                    val currentList = _recipesRecommended.value?.toMutableList() ?: mutableListOf()
-                    currentList.addAll(result)
-                    _recipesRecommended.postValue(currentList)
-                    currentPage++
-                }
+                val result = repository.loadRecommendationRecipe(id)
+                _recipesRecommended.postValue(result)
             } catch (e: Exception) {
-                _recipesRecommended.postValue(emptyList())
+                _recipesRecommended.postValue(null)
             } finally {
                 setLoading(false)
             }
@@ -95,7 +75,7 @@ class DashboardViewModel(
         }
     }
 
-    fun setLoading(isLoading: Boolean) {
+    private fun setLoading(isLoading: Boolean) {
         _isLoading.value = isLoading
     }
 

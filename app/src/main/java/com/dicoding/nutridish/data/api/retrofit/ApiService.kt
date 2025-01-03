@@ -3,6 +3,7 @@ package com.dicoding.nutridish.data.api.retrofit
 import com.dicoding.nutridish.data.LoginRequest
 import com.dicoding.nutridish.data.User
 import com.dicoding.nutridish.data.api.response.FileUploadResponse
+import com.dicoding.nutridish.data.api.response.MealPlanResponse
 import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.data.api.response.ResponseRecipeDetail
 import com.dicoding.nutridish.data.api.response.UserLoginResponse
@@ -40,6 +41,11 @@ interface ApiService {
     suspend fun getRecipeDetail(
         @Path("title") title: String
     ): Response<ResponseRecipeDetail>
+
+    @GET("meal_plan/{id}/")
+    suspend fun getRecommendationRecipe(
+        @Path("id") id: String
+    ): Response<MealPlanResponse>
 
     @Multipart
     @POST("image/{imageFile}")

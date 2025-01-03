@@ -19,6 +19,8 @@ data class NutriEntity(
     var fat: @RawValue Any? = null,
     var sodium: @RawValue Any? = null,
     var calories: @RawValue Any? = null,
+    var ingredients: String? = null,
+    var directions: String? = null,
     @ColumnInfo("bookmarked")
     var isBookmarked: Boolean
 ) : Parcelable

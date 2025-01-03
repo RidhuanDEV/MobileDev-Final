@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import com.dicoding.nutridish.data.Result
+import com.dicoding.nutridish.data.api.response.UserLoginResponse
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -72,7 +73,8 @@ class LoginActivity : AppCompatActivity() {
                 when (result) {
                     is Result.Success -> {
                         lifecycleScope.launch {
-                            viewModel.saveSession(email, password, true)
+                            viewModel.saveSession(email, password, true, result.data.userId.toString())
+                            Log.d("Login", "Login berhasil: ${result.data.userId}")
                         }
                         Toast.makeText(this@LoginActivity, "Login berhasil!", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this@LoginActivity, HomeActivity::class.java)
@@ -83,14 +85,18 @@ class LoginActivity : AppCompatActivity() {
                         Log.d("Login", "Login failed: ${result.error}")
                     }
 
-                    Result.Loading -> {
+                    is Result.Loading -> {
                         Toast.makeText(this@LoginActivity, "Sedang login...", Toast.LENGTH_SHORT).show()
+                    }
+
+                    else -> {   // Result.Empty
+                        Log.d("Login", "Login failed: ${"Error"}")
                     }
                 }
             }
         }
     }
-
-
-
 }
+
+
+

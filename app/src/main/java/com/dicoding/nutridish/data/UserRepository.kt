@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.dicoding.nutridish.data.api.response.FileUploadResponse
+import com.dicoding.nutridish.data.api.response.MealPlanResponse
 import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.data.api.response.ResponseRecipeDetail
+import com.dicoding.nutridish.data.api.response.UserLoginResponse
 import com.dicoding.nutridish.data.api.response.UserRegisterResponse
 import com.dicoding.nutridish.data.api.retrofit.ApiConfig
 import com.dicoding.nutridish.data.api.retrofit.ApiService
@@ -80,12 +82,13 @@ class UserRepository private constructor(
     }
 
 
-    suspend fun login(email: String, password: String): Result<Unit> {
+    suspend fun login(email: String, password: String): Result<UserLoginResponse> {
         return try {
             val request = LoginRequest(email, password)
             val response = apiService.login(request)
             if (response.isSuccessful) {
-                Result.Success(Unit)
+                val userLoginResponse = response.body() // Get the response body as UserLoginResponse
+                Result.Success(userLoginResponse ?: UserLoginResponse()) // Return the response object directly
             } else {
                 Result.Error(Exception(response.message()).toString())
             }
@@ -114,6 +117,20 @@ class UserRepository private constructor(
             }
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun loadRecommendationRecipe(id : String): MealPlanResponse {
+        return try {
+            userPreference.getSession()
+            val response = apiService.getRecommendationRecipe(id)
+            if (response.isSuccessful) {
+                response.body() ?: throw Exception("Response body is null")
+            } else {
+                throw Exception("Failed to load recommendation recipe: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            throw Exception("Failed to load recommendation recipe: ${e.message}")
         }
     }
 

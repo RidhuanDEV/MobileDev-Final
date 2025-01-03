@@ -9,7 +9,7 @@ import com.dicoding.nutridish.data.database.FloatTypeConverter
 import com.dicoding.nutridish.data.database.entity.NutriEntity
 import com.dicoding.nutridish.data.database.entity.NotificationEntity
 
-@Database(entities = [NutriEntity::class, NotificationEntity::class], version = 1, exportSchema = false)
+@Database(entities = [NutriEntity::class, NotificationEntity::class], version = 2, exportSchema = false)
 @TypeConverters(FloatTypeConverter::class)
 abstract class NutriDatabase : RoomDatabase() {
     abstract fun nutriDao(): NutriDao
