@@ -50,18 +50,24 @@
             android:layout_height="25dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="5dp"
+            android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textFoodName">
 
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/star" />
+
             <TextView
                 android:id="@+id/textRating"
-                android:layout_gravity="center"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="16dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="4dp"
                 android:text="asda"
-                android:textAlignment="center"
-                android:textSize="12sp"
-                app:drawableStartCompat="@drawable/star" />
+                android:textSize="12sp" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
