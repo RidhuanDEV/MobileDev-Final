@@ -1,6 +1,7 @@
 package com.dicoding.nutridish.data.database.entity
 
 
+import android.media.Rating
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -21,6 +22,8 @@ data class NutriEntity(
     var calories: @RawValue Any? = null,
     var ingredients: String? = null,
     var directions: String? = null,
+    var rating: @RawValue Any? = null,
+    var desc: String? = null,
     @ColumnInfo("bookmarked")
     var isBookmarked: Boolean
 ) : Parcelable

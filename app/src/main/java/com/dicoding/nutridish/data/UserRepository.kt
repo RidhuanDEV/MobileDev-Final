@@ -3,6 +3,7 @@ package com.dicoding.nutridish.data
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.dicoding.nutridish.data.api.response.DailyRecommendationsResponse
 import com.dicoding.nutridish.data.api.response.FileUploadResponse
 import com.dicoding.nutridish.data.api.response.MealPlanResponse
 import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
@@ -120,10 +121,10 @@ class UserRepository private constructor(
         }
     }
 
-    suspend fun loadRecommendationRecipe(id : String): MealPlanResponse {
+    suspend fun loadScheduleRecipe(id : String): MealPlanResponse {
         return try {
             userPreference.getSession()
-            val response = apiService.getRecommendationRecipe(id)
+            val response = apiService.getScheduleRecipe(id)
             if (response.isSuccessful) {
                 response.body() ?: throw Exception("Response body is null")
             } else {
@@ -147,19 +148,19 @@ class UserRepository private constructor(
         }
     }
 
-    suspend fun loadRecipesToday(query: String, filters: String?, page: Int, pageSize: Int): List<RecipeSearchResponseItem?>? {
+    suspend fun loadDailyRecommendation(userId : String, date : String): DailyRecommendationsResponse {
         return try {
-            val response = apiService.searchRecipes(query, filters, page, pageSize)
+            val response = apiService.getDailyRecommendation(UserRecommendation(userId, date))
             if (response.isSuccessful) {
-                response.body()
+                response.body() ?: throw Exception("Response body is null")
             } else {
-                null
+                throw Exception("Failed to load daily recommendation: ${response.errorBody()?.string()}")
             }
         } catch (e: Exception) {
-            null
+            throw Exception("Failed to load daily recommendation: ${e.message}")
         }
     }
-    
+
 
     fun uploadImage(imageFile: File) = liveData {
         emit(Result.Loading)

@@ -128,6 +128,8 @@ class DetailActivity : AppCompatActivity() {
                 sodium = nutriItem.sodium ?: 0,
                 ingredients = nutriItem.ingredients ?: "Data Is Missing!",
                 directions = nutriItem.directions ?: "Data Is Missing!",
+                desc = nutriItem.desc ?: "Data Is Missing!",
+                rating = nutriItem.rating ?: 0,
                 isBookmarked = true
             )
         }

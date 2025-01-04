@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dicoding.nutridish.data.UserRepository
+import com.dicoding.nutridish.data.api.response.DailyRecommendationsResponse
 import com.dicoding.nutridish.data.api.response.MealPlanResponse
 import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.data.database.entity.NutriEntity
@@ -13,8 +14,11 @@ import kotlinx.coroutines.launch
 class DashboardViewModel(
     private val repository: UserRepository
 ) : ViewModel(){
-    private val _recipesRecommended = MutableLiveData<MealPlanResponse?>(null)
-    val recipesRecommended: LiveData<MealPlanResponse?> get() = _recipesRecommended
+    private val _recipesSchedule = MutableLiveData<MealPlanResponse?>(null)
+    val recipesSchedule: LiveData<MealPlanResponse?> get() = _recipesSchedule
+
+    private val _dailyRecommendation = MutableLiveData<DailyRecommendationsResponse?>(null)
+    val dailyRecommendation: LiveData<DailyRecommendationsResponse?> get() = _dailyRecommendation
 
     private val _recipesToday = MutableLiveData<List<RecipeSearchResponseItem?>?>(mutableListOf())
     val recipesToday: LiveData<List<RecipeSearchResponseItem?>?> get() = _recipesToday
@@ -22,53 +26,33 @@ class DashboardViewModel(
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    private var currentPage = 1
-    private var isAllDataLoaded = false
-    private var lastQuery: String? = null
-    private var lastFilters: String? = null
-    private val pageSize = 10
     val getFavoriteRecipe: LiveData<List<NutriEntity>> = repository.getBookmarkedNutri()
 
-    fun getRecommendedRecipe(id: String) {
+    fun getScheduleRecipe(id: String) {
         setLoading(true)
         viewModelScope.launch {
             try {
-                val result = repository.loadRecommendationRecipe(id)
-                _recipesRecommended.postValue(result)
+                val result = repository.loadScheduleRecipe(id)
+                _recipesSchedule.postValue(result)
             } catch (e: Exception) {
-                _recipesRecommended.postValue(null)
+                _recipesSchedule.postValue(null)
             } finally {
                 setLoading(false)
             }
         }
     }
 
-    fun getTodayRecipe(query: String, filters: String? = null) {
-        // Reset pagination jika query atau filters berubah
-        if (query != lastQuery || filters != lastFilters) {
-            currentPage = 1
-            isAllDataLoaded = false
-            _recipesToday.value = mutableListOf()
-            lastQuery = query
-            lastFilters = filters
-        }
-
-        if (isAllDataLoaded) return
-
+    fun getDailyRecommendation(userId: String, date: String) {
         setLoading(true)
         viewModelScope.launch {
             try {
-                val result = repository.searchRecipes(query, filters, currentPage, pageSize)
-                if (result.isNullOrEmpty()) {
-                    isAllDataLoaded = true
-                } else {
-                    val currentList = _recipesToday.value?.toMutableList() ?: mutableListOf()
-                    currentList.addAll(result)
-                    _recipesToday.postValue(currentList)
-                    currentPage++
-                }
+                val result = repository
+                    .loadDailyRecommendation(
+                    userId = userId,
+                    date = date)
+                _dailyRecommendation.postValue(result)
             } catch (e: Exception) {
-                _recipesToday.postValue(emptyList())
+                _dailyRecommendation.postValue(null)
             } finally {
                 setLoading(false)
             }

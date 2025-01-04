@@ -51,7 +51,9 @@ import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.data.pref.UserPreference
 import com.dicoding.nutridish.data.pref.dataStore
 import com.dicoding.nutridish.notification.NotificationsBottomSheet
+import com.dicoding.nutridish.view.detail.DetailActivity
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 class DashboardFragment : Fragment() {
 
@@ -83,9 +85,9 @@ class DashboardFragment : Fragment() {
         setupTimeUpdates()
         checkLocationPermissionAndFetchTemperature()
         lifecycleScope.launch {
-            getRecommendedRecipes()
+            getScheduleRecipes()
             delay(2000)
-            getTodayRecipe()
+            getRecommendedRecipe()
         }
         scheduleMealNotifications()
     }
@@ -94,154 +96,191 @@ class DashboardFragment : Fragment() {
         return userPreference.getUserId()
     }
 
-    private fun getTodayRecipe() {
-        val factory = ViewModelFactory.getInstance(requireActivity())
-        val viewModel: DashboardViewModel by viewModels { factory }
-
-        lifecycleScope.launch {
-            // Pastikan View hanya diakses jika masih terikat ke Lifecycle
-            if (!isAdded || _binding == null) {
-                return@launch
-            }
-
-            val currentMillis = System.currentTimeMillis()
-            val hour = Calendar.getInstance().apply { timeInMillis = currentMillis }
-                .get(Calendar.HOUR_OF_DAY)
-
-            // Tentukan filter berdasarkan waktu (misalnya pagi, siang, malam)
-            val filter = when {
-                hour in 6..11 -> "breakfast"
-                hour in 12..17 -> "lunch"
-                else -> "dinner"
-            }
-
-            viewModel.getTodayRecipe("all", filter)
-            viewModel.recipesToday.observe(viewLifecycleOwner) { recipes ->
-                if (recipes.isNullOrEmpty()) {
-                    Log.d("DashboardFragment", "Today recipes is empty")
-                } else {
-                    val randomRecipe = recipes.randomOrNull()
-                    randomRecipe?.let {
-                        if (isAdded && _binding != null) {
-                            bindingSafe?.textScheduleTitle?.text = it.title ?: "Unknown"
-//                            Glide.with(requireContext()).load(R.drawable.imgfood14)
-//                                .into(bindingSafe?.scheduleIcon ?: return@let)
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     @RequiresApi(VERSION_CODES.O)
-    private fun getRecommendedRecipes() {
+    private fun getScheduleRecipes() {
         val factory = ViewModelFactory.getInstance(requireActivity())
         val viewModel: DashboardViewModel by viewModels { factory }
-        recommendationAdapter = DashboardRecommendationAdapter()
 
         lifecycleScope.launch {
             val userId = getUserId()
             if (userId != null) {
-                viewModel.getRecommendedRecipe(userId) // Kirim userId ke ViewModel
+                viewModel.getScheduleRecipe(userId)
 
-                viewModel.recipesRecommended.observe(viewLifecycleOwner) { recipes ->
+                viewModel.recipesSchedule.observe(viewLifecycleOwner) { recipes ->
                     if (recipes == null) {
                         Log.d("DashboardFragment", "Recommended recipes is empty")
                     } else {
+
                         // Dapatkan waktu sekarang dan debug waktu
                         val currentTime = LocalTime.now()
                         Log.d("DashboardFragment", "Current LocalTime: $currentTime")
                         Log.d("DashboardFragment", "Current Hour: ${currentTime.hour}")
 
                         // Tentukan meal berdasarkan waktu
-                        val value = when {
-                            currentTime.hour in 6..12 -> recipes.mealPlan?.breakfast // Ambil breakfast
-                            currentTime.hour in 13..16 -> recipes.mealPlan?.lunch     // Ambil lunch
-                            else -> recipes.mealPlan?.dinner                         // Ambil dinner
-                        }
-
-                        // Filter dan pastikan elemen sesuai tipe yang benar
-                        val items = when (value) {
-                            is List<*> -> {
-                                when {
-                                    value.firstOrNull() is BreakfastItem -> value.filterIsInstance<BreakfastItem>()
-                                    value.firstOrNull() is LunchItem -> value.filterIsInstance<LunchItem>()
-                                    value.firstOrNull() is DinnerItem -> value.filterIsInstance<DinnerItem>()
-                                    else -> emptyList() // Menghindari tipe yang tidak sesuai
+                        when (currentTime.hour) {
+                            in 6..12 -> recipes.mealPlan?.breakfast?.map { item ->
+                                bindingSafe?.textScheduleTitle?.text = item?.title
+                                Glide.with(requireContext())
+                                    .load(item?.image)
+                                    .into(bindingSafe?.scheduleIcon ?: return@map)
+                                bindingSafe?.scheduleWrapper?.setOnClickListener{
+                                    val intent = Intent(requireContext(), DetailActivity::class.java)
+                                    if (item != null) {
+                                        intent.putExtra("recipe_data_list", RecipeSearchResponseItem(
+                                            title = item.title ?: "No Title",
+                                            image = item.image,
+                                            calories = item.calories ?: 0.0,
+                                            protein = item.protein ?: 0.0,
+                                            sodium = item.sodium ?: 0.0,
+                                            fat = item.fat  ?: 0.0,
+                                            directions = item.directions ?: "No Instructions",
+                                            rating = item.rating ?: 0.0,
+                                            desc = if(item.desc == null){
+                                                        "No Description"
+                                                    } else {
+                                                        item.desc.toString()
+                                                    },
+                                            ingredients = item.ingredients
+                                        ))
+                                    }
+                                    startActivity(intent)
                                 }
                             }
-                            else -> emptyList<Any?>() // Menghindari jika value null atau tidak sesuai tipe
-                        }
-
-                        // Pemetaan item ke RecipeSearchResponseItem
-                        val mappedItems = items.map { item ->
-                            when (item) {
-                                is BreakfastItem -> RecipeSearchResponseItem(
-                                    title = item.title,
-                                    image = item.image,
-                                    calories = item.calories,
-                                    protein = item.protein,
-                                    sodium = item.sodium,
-                                    fat = item.fat,
-                                    directions = item.directions,
-                                    rating = item.rating,
-                                    date = item.date,
-                                    desc = item.desc.toString(),
-                                    ingredients = item.ingredients
-                                )
-                                is LunchItem -> RecipeSearchResponseItem(
-                                    title = item.title,
-                                    image = item.image,
-                                    calories = item.calories,
-                                    protein = item.protein,
-                                    sodium = item.sodium,
-                                    fat = item.fat,
-                                    directions = item.directions,
-                                    rating = item.rating,
-                                    date = item.date,
-                                    desc = item.desc,
-                                    ingredients = item.ingredients
-                                )
-                                is DinnerItem -> RecipeSearchResponseItem(
-                                    title = item.title,
-                                    image = item.image,
-                                    calories = item.calories,
-                                    protein = item.protein,
-                                    sodium = item.sodium,
-                                    fat = item.fat,
-                                    directions = item.directions,
-                                    rating = item.rating,
-                                    date = item.date,
-                                    desc = item.desc,
-                                    ingredients = item.ingredients
-                                )
-                                else -> throw IllegalArgumentException("Unsupported item type")
+                            in 13..16 -> recipes.mealPlan?.lunch?.map { item ->
+                                bindingSafe?.textScheduleTitle?.text = item?.title
+                                Glide.with(requireContext())
+                                    .load(item?.image)
+                                    .into(bindingSafe?.scheduleIcon ?: return@map)
+                                bindingSafe?.scheduleWrapper?.setOnClickListener{
+                                    val intent = Intent(requireContext(), DetailActivity::class.java)
+                                    if (item != null) {
+                                        intent.putExtra(
+                                            "recipe_data_list", RecipeSearchResponseItem(
+                                                title = item.title ?: "No Title",
+                                                image = item.image,
+                                                calories = item.calories ?: 0.0,
+                                                protein = item.protein ?: 0.0,
+                                                sodium = item.sodium ?: 0.0,
+                                                fat = item.fat ?: 0.0,
+                                                directions = item.directions ?: "No Instructions",
+                                                rating = item.rating ?: 0.0,
+                                                desc = if (item.desc == null) {
+                                                    "No Description"
+                                                } else {
+                                                    item.desc.toString()
+                                                },
+                                                ingredients = item.ingredients
+                                            )
+                                        )
+                                    }
+                                    startActivity(intent)
+                                }
+                            }
+                            else -> recipes.mealPlan?.dinner?.map { item ->
+                                bindingSafe?.textScheduleTitle?.text = item?.title
+                                Glide.with(requireContext())
+                                    .load(item?.image)
+                                    .into(bindingSafe?.scheduleIcon ?: return@map)
+                                bindingSafe?.scheduleWrapper?.setOnClickListener{
+                                    val intent = Intent(requireContext(), DetailActivity::class.java)
+                                    if (item != null) {
+                                        intent.putExtra(
+                                            "recipe_data_list", RecipeSearchResponseItem(
+                                                title = item.title ?: "No Title",
+                                                image = item.image,
+                                                calories = item.calories ?: 0.0,
+                                                protein = item.protein ?: 0.0,
+                                                sodium = item.sodium ?: 0.0,
+                                                fat = item.fat ?: 0.0,
+                                                directions = item.directions ?: "No Instructions",
+                                                rating = item.rating ?: 0.0,
+                                                desc = if (item.desc == null) {
+                                                    "No Description"
+                                                } else {
+                                                    item.desc.toString()
+                                                },
+                                                ingredients = item.ingredients
+                                            )
+                                        )
+                                    }
+                                    startActivity(intent)
+                                }
                             }
                         }
 
-                        // Submit daftar item yang telah dipetakan ke adapter
-                        recommendationAdapter.submitList(mappedItems)
-
-                        // Setup RecyclerView untuk menampilkan rekomendasi
-                        bindingSafe?.recyclerViewRecommendation?.apply {
-                            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-                            adapter = recommendationAdapter
-                        }
-
-                        // Tampilkan Toast untuk indikasi bahwa rekomendasi telah dimuat
-                        Toast.makeText(requireContext(), "Recommendations Loaded", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Schedule Recipe Loaded",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } else {
                 Log.e("DashboardFragment", "User ID is null")
-                Toast.makeText(requireContext(), "Gagal mendapatkan data pengguna.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Gagal mendapatkan data pengguna.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
-
-
-
     }
 
+    @RequiresApi(VERSION_CODES.O)
+    private fun getRecommendedRecipe(){
+        val factory = ViewModelFactory.getInstance(requireActivity())
+        val viewModel: DashboardViewModel by viewModels { factory }
+        recommendationAdapter = DashboardRecommendationAdapter()
+
+        lifecycleScope.launch {
+            val userId = getUserId()
+            val currentTime = LocalTime.now()
+
+            // Format waktu hanya jam dan menit
+            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            val formattedTime = currentTime.format(formatter)
+            if (userId != null) {
+                viewModel.getDailyRecommendation(userId, formattedTime)
+                viewModel.dailyRecommendation.observe(viewLifecycleOwner) { dailyRecommendation ->
+                    if (dailyRecommendation == null) {
+                        Log.d("DashboardFragment", "Recommended recipes is empty")
+                    } else {
+                        val items = dailyRecommendation.recommendations?.map { item ->
+                            RecipeSearchResponseItem(
+                                title = item?.title ?: "No Title",
+                                image = item?.image ?: "",
+                                calories = item?.nutrition?.calories ?: 0.0,
+                                protein = item?.nutrition?.protein ?: 0.0,
+                                sodium = item?.nutrition?.sodium ?: 0.0,
+                                fat = item?.nutrition?.fat ?: 0.0,
+                                directions = item?.directions ?: "No Instructions",
+                                rating = item?.rating ?: 0.0,
+                                desc = item?.description ?: "No Description",
+                                ingredients = item?.ingredients ?: "No Ingredients"
+                            )
+                        }
+                        recommendationAdapter.submitList(items)
+                    }
+                    // Setup RecyclerView untuk menampilkan rekomendasi
+                    bindingSafe?.recyclerViewRecommendation?.apply {
+                        layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                        adapter = recommendationAdapter
+                    }
+
+                    // Tampilkan Toast untuk indikasi bahwa rekomendasi telah dimuat
+                    Toast.makeText(requireContext(), "Recommendations Loaded", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Log.e("DashboardFragment", "User ID is null")
+                Toast.makeText(
+                    requireContext(),
+                    "Gagal mendapatkan data pengguna.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
 
     private fun setupGreeting() {
         bindingSafe?.textGreeting?.text = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
@@ -263,7 +302,16 @@ class DashboardFragment : Fragment() {
             } else {
                 val items = recentlyList.map {
                     RecipeSearchResponseItem(
-                        title = it.title
+                        title = it.title,
+                        image = it.mediaCover,
+                        calories = it.calories,
+                        protein = it.protein,
+                        sodium = it.sodium,
+                        fat = it.fat,
+                        directions = it.directions,
+                        rating = it.rating,
+                        desc = it.desc.toString(),
+                        ingredients = it.ingredients
                     )
                 }
                 recentlyAdapter.submitList(items)
