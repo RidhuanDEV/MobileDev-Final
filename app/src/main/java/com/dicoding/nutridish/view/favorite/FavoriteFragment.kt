@@ -40,7 +40,8 @@ class FavoriteFragment : Fragment() {
         viewModel.favoriteNutri.observe(viewLifecycleOwner) { favoriteList ->
             if (favoriteList != null) {
                 val items = favoriteList.map {
-                    RecipeSearchResponseItem(title = it.title)
+                    RecipeSearchResponseItem(title = it.title, image = it.mediaCover, rating = it.rating)
+
                 }
                 dataList = items
                 favoriteAdapter.submitList(items)
