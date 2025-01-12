@@ -63,17 +63,37 @@ class FavoriteFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                val filteredList = if (!newText.isNullOrEmpty()) {
-                    dataList.filter { it.title?.contains(newText, ignoreCase = true) ?: false }
+                if (!newText.isNullOrEmpty()) {
+                    viewModel.searchFavoritesByTitle(newText).observe(viewLifecycleOwner) { filteredList ->
+                        val items = filteredList.map {
+                            RecipeSearchResponseItem(
+                                title = it.title,
+                                image = it.mediaCover,
+                                rating = it.rating
+                            )
+                        }
+                        favoriteAdapter.submitList(items)
+                        updateUI(items.isEmpty())
+                    }
                 } else {
-                    dataList
+                    viewModel.favoriteNutri.observe(viewLifecycleOwner) { favoriteList ->
+                        val items = favoriteList.map {
+                            RecipeSearchResponseItem(
+                                title = it.title,
+                                image = it.mediaCover,
+                                rating = it.rating
+                            )
+                        }
+                        favoriteAdapter.submitList(items)
+                        updateUI(items.isEmpty())
+                    }
                 }
-                favoriteAdapter.submitList(filteredList)
-                updateUI(filteredList.isEmpty())
                 return true
             }
         })
     }
+
+
 
     private fun updateUI(isEmpty: Boolean) {
         binding.recyclerView.visibility = if (isEmpty) View.GONE else View.VISIBLE

@@ -34,6 +34,12 @@ class UserRepository private constructor(
         return apiService.getRecipeDetail(title)
     }
 
+    fun getAllFavorites(): LiveData<List<NutriEntity>> = nutriDao.getAllFavorites()
+
+    fun searchByTitle(title: String): LiveData<List<NutriEntity>> {
+        return nutriDao.searchByTitle("%$title%") // Menggunakan LIKE untuk pencarian fleksibel
+    }
+
     fun getBookmarkedNutri(): LiveData<List<NutriEntity>> {
         return nutriDao.getBookmarkedNutri() // Mengambil data dari Room sebagai LiveData
     }
