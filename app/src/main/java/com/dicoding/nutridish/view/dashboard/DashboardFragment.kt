@@ -340,7 +340,6 @@ class DashboardFragment : Fragment() {
         }
     }
 
-
     private fun checkLocationPermissionAndFetchTemperature() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -487,7 +486,7 @@ class DashboardFragment : Fragment() {
         val mealTimes = listOf(
             Pair(7, "Breakfast time! Don't forget to eat."),
             Pair(13, "Lunch time! It's important to stay energized."),
-            Pair(21, "Dinner time! End your day with a good meal.")
+            Pair(19, "Dinner time! End your day with a good meal.")
         )
 
         for ((hour, message) in mealTimes) {

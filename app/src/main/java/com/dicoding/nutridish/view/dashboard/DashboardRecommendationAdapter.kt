@@ -33,6 +33,7 @@ class DashboardRecommendationAdapter(
         @SuppressLint("SetTextI18n")
         fun bind(event: RecipeSearchResponseItem) {
             binding.tvItemName.text = event.title
+            binding.textRating.text = event.rating.toString()
             Glide.with(binding.imgItemPhoto.context)
                 .load(event.image)
                 .into(binding.imgItemPhoto)

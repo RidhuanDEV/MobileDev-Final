@@ -27,6 +27,11 @@ interface NutriDao   {
     @Query("DELETE FROM NutriDish WHERE title = :title AND bookmarked = 1")
     fun deleteNutriById(title: String)
 
+    @Query("SELECT * FROM NutriDish")
+    fun getAllFavorites(): LiveData<List<NutriEntity>>
+
+    @Query("SELECT * FROM NutriDish WHERE title LIKE :title")
+    fun searchByTitle(title: String): LiveData<List<NutriEntity>>
 
     @Query("SELECT EXISTS(SELECT * FROM NutriDish WHERE id = :id AND bookmarked = 1)")
     fun isNutriBookmarked(id: String): Boolean

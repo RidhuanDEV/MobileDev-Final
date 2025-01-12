@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
-import com.dicoding.nutridish.databinding.ItemFavoriteBinding
 import com.dicoding.nutridish.databinding.ItemRecentlyAddedBinding
 import com.dicoding.nutridish.view.detail.DetailActivity
 
@@ -34,6 +33,7 @@ class DashboardAdapter() : ListAdapter<RecipeSearchResponseItem, DashboardAdapte
         fun bind(event: RecipeSearchResponseItem) {
             Log.d("RecyclerView", "Binding item: ${event.title}")
             binding.textFoodName.text = event.title
+            binding.textRating.text = event.rating.toString()
             Glide.with(binding.imageFood.context)
                 .load(event.image)
                 .into(binding.imageFood)

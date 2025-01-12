@@ -11,4 +11,10 @@ import kotlinx.coroutines.withContext
 
 class FavoriteViewModel(private val repository: UserRepository) : ViewModel() {
     val favoriteNutri: LiveData<List<NutriEntity>> = repository.getBookmarkedNutri()
+
+    val favoriteNutris: LiveData<List<NutriEntity>> = repository.getAllFavorites()
+
+    fun searchFavoritesByTitle(query: String): LiveData<List<NutriEntity>> {
+        return repository.searchByTitle(query)
+    }
 }

@@ -2,6 +2,7 @@ package com.dicoding.nutridish.view.favorite
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -28,13 +29,15 @@ class FavoriteAdapter(
         }
     }
 
-    class MyViewHolder(private val binding: ItemFavoriteBinding) : RecyclerView.ViewHolder(binding.root) {
+    class MyViewHolder(private val binding: ItemFavoriteBinding)
+        : RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
         fun bind(event: RecipeSearchResponseItem) {
             binding.tvItemName.text = event.title
-//            Glide.with(binding.imgItemPhoto.context)
-//                .load(event.mediaCover)
-//                .into(binding.imgItemPhoto)
+            binding.textRating.text = event.rating.toString()
+            Glide.with(binding.imgItemPhoto.context)
+                .load(event.image)
+                .into(binding.imgItemPhoto)
             val itemDataList = "recipe_data_list"
             binding.cardView.setOnClickListener {
                 val context = itemView.context
