@@ -52,6 +52,7 @@ import com.dicoding.nutridish.data.pref.UserPreference
 import com.dicoding.nutridish.data.pref.dataStore
 import com.dicoding.nutridish.notification.NotificationsBottomSheet
 import com.dicoding.nutridish.view.detail.DetailActivity
+import kotlinx.coroutines.Job
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -65,6 +66,7 @@ class DashboardFragment : Fragment() {
 
     private var _binding: FragmentDashboardBinding? = null
     private val bindingSafe get() = _binding
+    private var job: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,16 +82,18 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         userPreference = UserPreference.getInstance(requireContext().dataStore)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
-        setupGreeting()
-        setupRecyclerView()
-        setupTimeUpdates()
-        checkLocationPermissionAndFetchTemperature()
-        lifecycleScope.launch {
+
+        job = lifecycleScope.launch {
+            setupGreeting()
+            setupRecyclerView()
+            setupTimeUpdates()
+            checkLocationPermissionAndFetchTemperature()
             getScheduleRecipes()
-            delay(2000)
+            delay(3000)
             getRecommendedRecipe()
+            scheduleMealNotifications()
         }
-        scheduleMealNotifications()
+
     }
 
     private suspend fun getUserId(): String? {
@@ -438,6 +442,7 @@ class DashboardFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        job?.cancel()
     }
 
     @Deprecated("Deprecated in Java")
