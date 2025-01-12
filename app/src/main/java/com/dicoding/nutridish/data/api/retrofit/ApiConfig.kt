@@ -21,7 +21,7 @@ object ApiConfig {
             .build()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://backend-nwyn.onrender.com/")
+            .baseUrl("http://158.140.161.26:10000/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
