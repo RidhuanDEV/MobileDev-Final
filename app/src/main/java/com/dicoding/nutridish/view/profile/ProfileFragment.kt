@@ -2,13 +2,10 @@ package com.dicoding.nutridish.view.profile
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -16,15 +13,9 @@ import com.dicoding.nutridish.R
 import com.dicoding.nutridish.ViewModelFactory
 import com.dicoding.nutridish.data.pref.UserPreference
 import com.dicoding.nutridish.data.pref.dataStore
-import com.dicoding.nutridish.databinding.FragmentDashboardBinding
 import com.dicoding.nutridish.databinding.FragmentProfileBinding
 import com.dicoding.nutridish.main.MainActivity
-import com.dicoding.nutridish.view.dashboard.DashboardViewModel
 import com.dicoding.nutridish.view.profile.settings.AboutActivity
-import com.dicoding.nutridish.view.profile.settings.UpdateProfileActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.launch
 
 

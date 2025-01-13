@@ -1,7 +1,6 @@
 package com.dicoding.nutridish.data.database.entity
 
 
-import android.media.Rating
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity

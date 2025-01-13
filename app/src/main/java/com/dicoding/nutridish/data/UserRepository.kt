@@ -2,7 +2,6 @@ package com.dicoding.nutridish.data
 
 import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import com.dicoding.nutridish.data.api.response.DailyRecommendationsResponse
 import com.dicoding.nutridish.data.api.response.FileUploadResponse

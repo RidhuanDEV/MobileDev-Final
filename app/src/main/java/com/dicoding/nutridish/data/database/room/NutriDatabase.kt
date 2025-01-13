@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.dicoding.nutridish.data.database.FloatTypeConverter
-import com.dicoding.nutridish.data.database.entity.NutriEntity
 import com.dicoding.nutridish.data.database.entity.NotificationEntity
+import com.dicoding.nutridish.data.database.entity.NutriEntity
 
 @Database(entities = [NutriEntity::class, NotificationEntity::class], version = 3, exportSchema = false)
 @TypeConverters(FloatTypeConverter::class)

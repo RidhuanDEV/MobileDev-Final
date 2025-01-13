@@ -1,13 +1,11 @@
 package com.dicoding.nutridish.personalization
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.dicoding.nutridish.R
 
 class AvoidPorkFragment : Fragment(R.layout.fragment_avoid_pork) {

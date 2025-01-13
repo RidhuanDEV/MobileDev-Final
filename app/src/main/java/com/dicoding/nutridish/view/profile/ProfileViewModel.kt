@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dicoding.nutridish.data.UserRepository
 import com.dicoding.nutridish.data.api.response.UserResponse
-import com.dicoding.nutridish.data.api.retrofit.ApiService
 import com.dicoding.nutridish.data.pref.UserPreference
 import kotlinx.coroutines.launch
 

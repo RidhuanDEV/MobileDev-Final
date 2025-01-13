@@ -4,11 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dicoding.nutridish.data.User
-import com.dicoding.nutridish.data.UserRepository
-import kotlinx.coroutines.launch
 import com.dicoding.nutridish.data.Result
+import com.dicoding.nutridish.data.UserRepository
 import com.dicoding.nutridish.data.api.response.UserRegisterResponse
+import kotlinx.coroutines.launch
 
 class SignUpViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val _registrationResult = MutableLiveData<Result<UserRegisterResponse>>()

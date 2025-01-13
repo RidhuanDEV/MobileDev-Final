@@ -4,11 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dicoding.nutridish.data.pref.UserModel
-import com.dicoding.nutridish.data.pref.UserPreference
 import com.dicoding.nutridish.data.Result
 import com.dicoding.nutridish.data.UserRepository
 import com.dicoding.nutridish.data.api.response.UserLoginResponse
+import com.dicoding.nutridish.data.pref.UserModel
+import com.dicoding.nutridish.data.pref.UserPreference
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val userPreference: UserPreference, private val repository: UserRepository): ViewModel() {

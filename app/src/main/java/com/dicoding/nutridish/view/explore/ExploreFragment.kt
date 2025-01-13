@@ -1,7 +1,6 @@
 package com.dicoding.nutridish.view.explore
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent

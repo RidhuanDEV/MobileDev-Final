@@ -15,15 +15,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.dicoding.nutridish.R
 import com.dicoding.nutridish.ViewModelFactory
+import com.dicoding.nutridish.data.Result
 import com.dicoding.nutridish.databinding.ActivityLoginBinding
-import com.dicoding.nutridish.personalization.PersonalizeActivity
 import com.dicoding.nutridish.signup.SignUpActivity
 import com.dicoding.nutridish.view.HomeActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-import com.dicoding.nutridish.data.Result
-import com.dicoding.nutridish.data.api.response.UserLoginResponse
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding

@@ -11,21 +11,14 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.lifecycleScope
 import com.dicoding.nutridish.R
 import com.dicoding.nutridish.ViewModelFactory
 import com.dicoding.nutridish.databinding.ActivityMainBinding
 import com.dicoding.nutridish.login.LoginActivity
-import com.dicoding.nutridish.personalization.PersonalizeActivity
-import com.dicoding.nutridish.view.HomeActivity
 import com.dicoding.nutridish.signup.SignUpActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding

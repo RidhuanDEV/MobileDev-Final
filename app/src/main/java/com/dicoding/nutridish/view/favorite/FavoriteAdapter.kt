@@ -2,7 +2,6 @@ package com.dicoding.nutridish.view.favorite
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
