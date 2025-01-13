@@ -43,7 +43,6 @@ class ProfileFragment : Fragment() {
         return _binding?.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         userPreference = UserPreference.getInstance(requireContext().dataStore)
@@ -51,9 +50,6 @@ class ProfileFragment : Fragment() {
             setupProfile()
         }
 
-
-
-        val buttonUpdate = view.findViewById<View>(R.id.btnUpdateProfile)
         val buttonAbout = view.findViewById<View>(R.id.btnAboutApp)
         val buttonLogout = view.findViewById<View>(R.id.btnLogout)
 
@@ -63,10 +59,7 @@ class ProfileFragment : Fragment() {
             val intent = Intent(activity, AboutActivity::class.java)
             startActivity(intent)
         }
-        buttonUpdate.setOnClickListener{
-            val intent = Intent(activity, UpdateProfileActivity::class.java)
-            startActivity(intent)
-        }
+
         buttonLogout.setOnClickListener{
             lifecycleScope.launch {
                 viewModel.logout()
@@ -74,7 +67,6 @@ class ProfileFragment : Fragment() {
                 startActivity(intent)
                 activity?.finish()
             }
-
         }
     }
 
@@ -94,8 +86,6 @@ class ProfileFragment : Fragment() {
                 }
             }
         }
-
-
     }
 
     private suspend fun getUserId(): String? {

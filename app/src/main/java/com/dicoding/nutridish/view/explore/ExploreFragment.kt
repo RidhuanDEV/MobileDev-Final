@@ -294,6 +294,5 @@ class ExploreFragment : Fragment() {
 
     private fun searchRecipes(query: String, filters: String? = null) {
         viewModel.searchRecipes(query, filters)
-        Toast.makeText(requireContext(), "Searching for $query", Toast.LENGTH_SHORT).show()
     }
 }
