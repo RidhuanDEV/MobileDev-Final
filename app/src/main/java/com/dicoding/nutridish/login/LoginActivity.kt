@@ -78,6 +78,7 @@ class LoginActivity : AppCompatActivity() {
                         finish()
                     }
                     is Result.Error -> {
+                        Toast.makeText(this@LoginActivity, "Login Gagal", Toast.LENGTH_SHORT).show()
                         Log.d("Login", "Login failed: ${result.error}")
                     }
 
