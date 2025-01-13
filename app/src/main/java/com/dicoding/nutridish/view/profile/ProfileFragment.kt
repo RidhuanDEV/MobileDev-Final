@@ -9,11 +9,17 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.dicoding.nutridish.R
 import com.dicoding.nutridish.ViewModelFactory
+import com.dicoding.nutridish.data.pref.UserPreference
+import com.dicoding.nutridish.data.pref.dataStore
+import com.dicoding.nutridish.databinding.FragmentDashboardBinding
+import com.dicoding.nutridish.databinding.FragmentProfileBinding
 import com.dicoding.nutridish.main.MainActivity
+import com.dicoding.nutridish.view.dashboard.DashboardViewModel
 import com.dicoding.nutridish.view.profile.settings.AboutActivity
 import com.dicoding.nutridish.view.profile.settings.UpdateProfileActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -24,45 +30,28 @@ import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var firestore: FirebaseFirestore
-    private var userSnapshotListener: ListenerRegistration? = null
+    private lateinit var userPreference: UserPreference
+    private var _binding: FragmentProfileBinding? = null
+    private val bindingSafe get() = _binding
+    private lateinit var viewModel : ProfileViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        return _binding?.root
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        auth = FirebaseAuth.getInstance()
-        firestore = FirebaseFirestore.getInstance()
-
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            val userId = currentUser.uid
-
-            userSnapshotListener = firestore.collection("users").document(userId)
-                .addSnapshotListener { snapshot, error ->
-                    if (error != null) {
-                        Toast.makeText(requireContext(), "Gagal memuat data pengguna.", Toast.LENGTH_SHORT).show()
-                        return@addSnapshotListener
-                    }
-
-                    if (snapshot != null && snapshot.exists()) {
-                        val name = snapshot.getString("userName") ?: "Unknown"
-                        val email = snapshot.getString("email") ?: "Unknown"
-
-                        // Update UI
-                        view.findViewById<TextView>(R.id.textName).text = name
-                        view.findViewById<TextView>(R.id.textEmail).text = email
-                    }
-                }
+        userPreference = UserPreference.getInstance(requireContext().dataStore)
+        lifecycleScope.launch {
+            setupProfile()
         }
+
+
 
         val buttonUpdate = view.findViewById<View>(R.id.btnUpdateProfile)
         val buttonAbout = view.findViewById<View>(R.id.btnAboutApp)
@@ -89,9 +78,28 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        userSnapshotListener?.remove()
+    private fun setupProfile() {
+        val factory = ViewModelFactory.getInstance(requireActivity())
+        val viewModel: ProfileViewModel by viewModels { factory }
+        lifecycleScope.launch {
+            val userId = getUserId()
+            if (userId != null) {
+                viewModel.getUser(userId)
+            }
+            viewModel.userResult.observe(viewLifecycleOwner) { user ->
+                bindingSafe?.apply {
+                    textGreeting.text = "Hello, ${user?.userName}"
+                    textName.text = user?.userName
+                    textEmail.text = user?.email
+                }
+            }
+        }
+
+
+    }
+
+    private suspend fun getUserId(): String? {
+        return userPreference.getUserId()
     }
 
 }

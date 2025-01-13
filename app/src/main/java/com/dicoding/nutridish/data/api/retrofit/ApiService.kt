@@ -10,6 +10,7 @@ import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.data.api.response.ResponseRecipeDetail
 import com.dicoding.nutridish.data.api.response.UserLoginResponse
 import com.dicoding.nutridish.data.api.response.UserRegisterResponse
+import com.dicoding.nutridish.data.api.response.UserResponse
 import okhttp3.MultipartBody
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
@@ -60,6 +61,11 @@ interface ApiService {
         @Path("imageFile") imageFile: String, // Nama file yang dikirim ke server
         @Part file: MultipartBody.Part  // Bagian file gambar
     ): FileUploadResponse
+
+    @GET("user/{id}")
+    suspend fun getUser(
+        @Path("id") id: String
+    ): Response<UserResponse>
 
 
 }

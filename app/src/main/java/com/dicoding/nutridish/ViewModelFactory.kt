@@ -29,7 +29,7 @@ class ViewModelFactory private constructor(
                 MainViewModel(userRepository, userPreference) as T
             }
             modelClass.isAssignableFrom(ProfileViewModel::class.java) -> {
-                ProfileViewModel(userPreference) as T
+                ProfileViewModel(userPreference, userRepository) as T
             }
             modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
                 LoginViewModel(userPreference, userRepository) as T

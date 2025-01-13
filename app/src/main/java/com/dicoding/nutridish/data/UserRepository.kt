@@ -2,6 +2,7 @@ package com.dicoding.nutridish.data
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import com.dicoding.nutridish.data.api.response.DailyRecommendationsResponse
 import com.dicoding.nutridish.data.api.response.FileUploadResponse
@@ -10,6 +11,7 @@ import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.data.api.response.ResponseRecipeDetail
 import com.dicoding.nutridish.data.api.response.UserLoginResponse
 import com.dicoding.nutridish.data.api.response.UserRegisterResponse
+import com.dicoding.nutridish.data.api.response.UserResponse
 import com.dicoding.nutridish.data.api.retrofit.ApiConfig
 import com.dicoding.nutridish.data.api.retrofit.ApiService
 import com.dicoding.nutridish.data.database.entity.NutriEntity
@@ -112,6 +114,19 @@ class UserRepository private constructor(
     }
     suspend fun logout() {
         userPreference.logout()
+    }
+
+    suspend fun getUser(id : String) : UserResponse? {
+        return try {
+            val response = apiService.getUser(id)
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
     }
 
     suspend fun searchRecipes(query: String, filters: String?, page: Int, pageSize: Int): List<RecipeSearchResponseItem?>? {
