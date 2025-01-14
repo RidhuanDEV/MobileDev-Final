@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -22,39 +23,31 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.dicoding.nutridish.R
+import com.bumptech.glide.Glide
 import com.dicoding.nutridish.ViewModelFactory
+import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
+import com.dicoding.nutridish.data.pref.UserPreference
+import com.dicoding.nutridish.data.pref.dataStore
 import com.dicoding.nutridish.databinding.FragmentDashboardBinding
-import com.dicoding.nutridish.notification.NotificationHelper
 import com.dicoding.nutridish.notification.NotificationReceiver
+import com.dicoding.nutridish.notification.NotificationsBottomSheet
+import com.dicoding.nutridish.view.detail.DetailActivity
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 import java.text.SimpleDateFormat
-import java.util.*
-import android.os.Build.VERSION_CODES
-import androidx.datastore.dataStore
-import com.bumptech.glide.Glide
-import com.dicoding.nutridish.data.api.response.BreakfastItem
-import com.dicoding.nutridish.data.api.response.DinnerItem
-import com.dicoding.nutridish.data.api.response.LunchItem
-import com.dicoding.nutridish.data.api.response.MealPlan
-import com.dicoding.nutridish.data.api.response.MealPlanResponse
-import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
-import com.dicoding.nutridish.data.pref.UserPreference
-import com.dicoding.nutridish.data.pref.dataStore
-import com.dicoding.nutridish.notification.NotificationsBottomSheet
-import com.dicoding.nutridish.view.detail.DetailActivity
-import kotlinx.coroutines.Job
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Locale
 
 class DashboardFragment : Fragment() {
 
@@ -68,6 +61,9 @@ class DashboardFragment : Fragment() {
     private val bindingSafe get() = _binding
     private var job: Job? = null
 
+    private var _isLoading = MutableStateFlow(false)
+    private val isLoading = _isLoading.asStateFlow()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -77,29 +73,57 @@ class DashboardFragment : Fragment() {
         return _binding?.root
     }
 
+    private fun showLoading() {
+        _isLoading.value = true
+        activity?.runOnUiThread {
+            bindingSafe?.loadingOverlay?.apply {
+                visibility = View.VISIBLE
+                bringToFront()
+            }
+            bindingSafe?.parentLayout?.alpha = 0.5f
+        }
+    }
+
+    private fun hideLoading() {
+        _isLoading.value = false
+        activity?.runOnUiThread {
+            bindingSafe?.loadingOverlay?.visibility = View.GONE
+            bindingSafe?.parentLayout?.alpha = 1.0f
+        }
+    }
+
     @RequiresApi(VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         userPreference = UserPreference.getInstance(requireContext().dataStore)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
-        job = lifecycleScope.launch {
-            setupGreeting()
-            setupRecyclerView()
-            setupTimeUpdates()
-            checkLocationPermissionAndFetchTemperature()
-            getScheduleRecipes()
-            delay(3000)
-            getRecommendedRecipe()
-            scheduleMealNotifications()
+        lifecycleScope.launch {
+            isLoading.collect { loading ->
+                Log.d("Loading", "Loading state changed: $loading")
+            }
         }
 
+        job = lifecycleScope.launch {
+            showLoading()
+            delay(1000)// Show loading at start
+            try {
+                setupGreeting()
+                setupRecyclerView()
+                setupTimeUpdates()
+                checkLocationPermissionAndFetchTemperature()
+                getScheduleRecipes()
+                getRecommendedRecipe()
+                scheduleMealNotifications()
+            } finally {
+                hideLoading() // Hide loading when done
+            }
+        }
     }
 
     private suspend fun getUserId(): String? {
         return userPreference.getUserId()
     }
-
 
     @RequiresApi(VERSION_CODES.O)
     private fun getScheduleRecipes() {
@@ -107,21 +131,19 @@ class DashboardFragment : Fragment() {
         val viewModel: DashboardViewModel by viewModels { factory }
 
         lifecycleScope.launch {
-            val userId = getUserId()
-            if (userId != null) {
-                viewModel.getScheduleRecipe(userId)
+            showLoading() // Tampilkan loading di awal
+            try {
+                val userId = getUserId() ?: throw Exception("User ID tidak ditemukan")
 
+                viewModel.getScheduleRecipe(userId)
                 viewModel.recipesSchedule.observe(viewLifecycleOwner) { recipes ->
                     if (recipes == null) {
                         Log.d("DashboardFragment", "Recommended recipes is empty")
                     } else {
-
-                        // Dapatkan waktu sekarang dan debug waktu
                         val currentTime = LocalTime.now()
                         Log.d("DashboardFragment", "Current LocalTime: $currentTime")
                         Log.d("DashboardFragment", "Current Hour: ${currentTime.hour}")
 
-                        // Tentukan meal berdasarkan waktu
                         when (currentTime.hour) {
                             in 6..12 -> recipes.mealPlan?.breakfast?.map { item ->
                                 bindingSafe?.textScheduleTitle?.text = item?.title
@@ -140,11 +162,7 @@ class DashboardFragment : Fragment() {
                                             fat = item.fat  ?: 0.0,
                                             directions = item.directions ?: "No Instructions",
                                             rating = item.rating ?: 0.0,
-                                            desc = if(item.desc == null){
-                                                        "No Description"
-                                                    } else {
-                                                        item.desc.toString()
-                                                    },
+                                            desc = item.desc?.toString() ?: "No Description",
                                             ingredients = item.ingredients
                                         ))
                                     }
@@ -159,24 +177,18 @@ class DashboardFragment : Fragment() {
                                 bindingSafe?.scheduleWrapper?.setOnClickListener{
                                     val intent = Intent(requireContext(), DetailActivity::class.java)
                                     if (item != null) {
-                                        intent.putExtra(
-                                            "recipe_data_list", RecipeSearchResponseItem(
-                                                title = item.title ?: "No Title",
-                                                image = item.image,
-                                                calories = item.calories ?: 0.0,
-                                                protein = item.protein ?: 0.0,
-                                                sodium = item.sodium ?: 0.0,
-                                                fat = item.fat ?: 0.0,
-                                                directions = item.directions ?: "No Instructions",
-                                                rating = item.rating ?: 0.0,
-                                                desc = if (item.desc == null) {
-                                                    "No Description"
-                                                } else {
-                                                    item.desc.toString()
-                                                },
-                                                ingredients = item.ingredients
-                                            )
-                                        )
+                                        intent.putExtra("recipe_data_list", RecipeSearchResponseItem(
+                                            title = item.title ?: "No Title",
+                                            image = item.image,
+                                            calories = item.calories ?: 0.0,
+                                            protein = item.protein ?: 0.0,
+                                            sodium = item.sodium ?: 0.0,
+                                            fat = item.fat ?: 0.0,
+                                            directions = item.directions ?: "No Instructions",
+                                            rating = item.rating ?: 0.0,
+                                            desc = item.desc?.toString() ?: "No Description",
+                                            ingredients = item.ingredients
+                                        ))
                                     }
                                     startActivity(intent)
                                 }
@@ -189,62 +201,53 @@ class DashboardFragment : Fragment() {
                                 bindingSafe?.scheduleWrapper?.setOnClickListener{
                                     val intent = Intent(requireContext(), DetailActivity::class.java)
                                     if (item != null) {
-                                        intent.putExtra(
-                                            "recipe_data_list", RecipeSearchResponseItem(
-                                                title = item.title ?: "No Title",
-                                                image = item.image,
-                                                calories = item.calories ?: 0.0,
-                                                protein = item.protein ?: 0.0,
-                                                sodium = item.sodium ?: 0.0,
-                                                fat = item.fat ?: 0.0,
-                                                directions = item.directions ?: "No Instructions",
-                                                rating = item.rating ?: 0.0,
-                                                desc = if (item.desc == null) {
-                                                    "No Description"
-                                                } else {
-                                                    item.desc.toString()
-                                                },
-                                                ingredients = item.ingredients
-                                            )
-                                        )
+                                        intent.putExtra("recipe_data_list", RecipeSearchResponseItem(
+                                            title = item.title ?: "No Title",
+                                            image = item.image,
+                                            calories = item.calories ?: 0.0,
+                                            protein = item.protein ?: 0.0,
+                                            sodium = item.sodium ?: 0.0,
+                                            fat = item.fat ?: 0.0,
+                                            directions = item.directions ?: "No Instructions",
+                                            rating = item.rating ?: 0.0,
+                                            desc = item.desc?.toString() ?: "No Description",
+                                            ingredients = item.ingredients
+                                        ))
                                     }
                                     startActivity(intent)
                                 }
                             }
                         }
-
-                        Toast.makeText(
-                            requireContext(),
-                            "Schedule Recipe Loaded",
-                            Toast.LENGTH_SHORT
-                        ).show()
                     }
+                    hideLoading() // Sembunyikan loading setelah data selesai diproses
                 }
-            } else {
-                Log.e("DashboardFragment", "User ID is null")
+            } catch (e: Exception) {
+                hideLoading() // Pastikan loading disembunyikan jika terjadi error
                 Toast.makeText(
                     requireContext(),
-                    "Gagal mendapatkan data pengguna.",
+                    "Error: ${e.message}",
                     Toast.LENGTH_SHORT
                 ).show()
+                Log.e("DashboardFragment", "Error loading schedule recipes", e)
             }
         }
     }
 
     @RequiresApi(VERSION_CODES.O)
-    private fun getRecommendedRecipe(){
+    private fun getRecommendedRecipe() {
         val factory = ViewModelFactory.getInstance(requireActivity())
         val viewModel: DashboardViewModel by viewModels { factory }
         recommendationAdapter = DashboardRecommendationAdapter()
 
         lifecycleScope.launch {
-            val userId = getUserId()
-            val currentTime = LocalTime.now()
+            showLoading() // Tampilkan loading di awal
+            try {
+                val userId = getUserId() ?: throw Exception("User ID tidak ditemukan")
 
-            // Format waktu hanya jam dan menit
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
-            val formattedTime = currentTime.format(formatter)
-            if (userId != null) {
+                val currentTime = LocalTime.now()
+                val formatter = DateTimeFormatter.ofPattern("HH:mm")
+                val formattedTime = currentTime.format(formatter)
+
                 viewModel.getDailyRecommendation(userId, formattedTime)
                 viewModel.dailyRecommendation.observe(viewLifecycleOwner) { dailyRecommendation ->
                     if (dailyRecommendation == null) {
@@ -265,23 +268,22 @@ class DashboardFragment : Fragment() {
                             )
                         }
                         recommendationAdapter.submitList(items)
-                    }
-                    // Setup RecyclerView untuk menampilkan rekomendasi
-                    bindingSafe?.recyclerViewRecommendation?.apply {
-                        layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-                        adapter = recommendationAdapter
-                    }
 
-                    // Tampilkan Toast untuk indikasi bahwa rekomendasi telah dimuat
-                    Toast.makeText(requireContext(), "Recommendations Loaded", Toast.LENGTH_SHORT).show()
+                        bindingSafe?.recyclerViewRecommendation?.apply {
+                            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                            adapter = recommendationAdapter
+                        }
+                    }
+                    hideLoading() // Sembunyikan loading setelah data selesai diproses
                 }
-            } else {
-                Log.e("DashboardFragment", "User ID is null")
+            } catch (e: Exception) {
+                hideLoading() // Pastikan loading disembunyikan jika terjadi error
                 Toast.makeText(
                     requireContext(),
-                    "Gagal mendapatkan data pengguna.",
+                    "Error: ${e.message}",
                     Toast.LENGTH_SHORT
                 ).show()
+                Log.e("DashboardFragment", "Error loading recommendations", e)
             }
         }
     }

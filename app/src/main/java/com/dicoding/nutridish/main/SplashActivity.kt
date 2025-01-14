@@ -12,15 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.dicoding.nutridish.ViewModelFactory
-import com.dicoding.nutridish.data.pref.UserPreference
+import com.dicoding.nutridish.data.Result
 import com.dicoding.nutridish.databinding.ActivitySplashBinding
-import com.dicoding.nutridish.personalization.PersonalizeActivity
 import com.dicoding.nutridish.view.HomeActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.dicoding.nutridish.data.Result
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {

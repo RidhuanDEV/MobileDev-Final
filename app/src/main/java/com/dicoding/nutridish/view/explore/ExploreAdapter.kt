@@ -4,16 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.GridLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.dicoding.nutridish.R
 import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.databinding.ItemRecentlyAddedBinding
 import com.dicoding.nutridish.view.detail.DetailActivity

@@ -1,7 +1,6 @@
 package com.dicoding.nutridish.view.explore
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
@@ -294,6 +293,5 @@ class ExploreFragment : Fragment() {
 
     private fun searchRecipes(query: String, filters: String? = null) {
         viewModel.searchRecipes(query, filters)
-        Toast.makeText(requireContext(), "Searching for $query", Toast.LENGTH_SHORT).show()
     }
 }

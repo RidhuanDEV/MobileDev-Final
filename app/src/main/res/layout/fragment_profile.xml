@@ -116,34 +116,20 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- Buttons -->
-        <Button
-            android:id="@+id/btnUpdateProfile"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="100dp"
-            android:layout_marginEnd="16dp"
-            android:backgroundTint="@color/navy"
-            android:text="@string/update_profiles"
-            android:textColor="@android:color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/detailsLayout" />
 
         <Button
             android:id="@+id/btnAboutApp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="64dp"
             android:backgroundTint="@color/navy"
             android:text="@string/about_app"
             android:textColor="@android:color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnUpdateProfile" />
+            app:layout_constraintTop_toBottomOf="@+id/detailsLayout" />
 
         <Button
             android:id="@+id/btnLogout"

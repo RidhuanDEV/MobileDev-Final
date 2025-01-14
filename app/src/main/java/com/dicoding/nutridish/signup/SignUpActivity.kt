@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.nutridish.R
 import com.dicoding.nutridish.ViewModelFactory
-import com.dicoding.nutridish.data.User
 import com.dicoding.nutridish.data.Result
 import com.dicoding.nutridish.databinding.ActivitySignUpBinding
 import com.dicoding.nutridish.login.LoginActivity

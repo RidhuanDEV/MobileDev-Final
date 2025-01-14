@@ -4,7 +4,6 @@ package com.dicoding.nutridish.view.detail
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -12,15 +11,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.dicoding.nutridish.R
 import com.dicoding.nutridish.ViewModelFactory
+import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import com.dicoding.nutridish.data.database.entity.NutriEntity
 import com.dicoding.nutridish.databinding.ActivityDetailBinding
-import kotlinx.coroutines.launch
-import com.dicoding.nutridish.data.Result
-import com.dicoding.nutridish.data.api.response.RecipeSearchResponseItem
 import org.json.JSONArray
 import org.json.JSONException
 
