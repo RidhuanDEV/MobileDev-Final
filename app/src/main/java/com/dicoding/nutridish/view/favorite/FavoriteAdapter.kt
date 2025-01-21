@@ -55,6 +55,4 @@ class FavoriteAdapter(
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
-
-
 }

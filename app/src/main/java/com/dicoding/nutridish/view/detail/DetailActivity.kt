@@ -64,7 +64,6 @@ class DetailActivity : AppCompatActivity() {
                 emptyList<String>()
             }
 
-
             val formattedIngredients = ingredientsList.joinToString("\n") { it.trim() }
 
             binding.ingredientsText.text = if (formattedIngredients.isNotEmpty()) {
@@ -96,7 +95,6 @@ class DetailActivity : AppCompatActivity() {
                 "No Instructions"
             }
 
-
             // Update nutrition card data
             binding.caloriestext.text = nutriItem.calories?.toString() ?: "0"
             binding.proteintext.text = nutriItem.protein?.toString() ?: "0"
@@ -111,7 +109,6 @@ class DetailActivity : AppCompatActivity() {
         ivBookmark.setOnClickListener {
             updateBookmarkIcon(database)
         }
-
 
         // Initialize NutriEntity
         if (nutriItem != null) {
@@ -137,7 +134,6 @@ class DetailActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun updateBookmarkIcon(database: NutriEntity) {
         viewModel.checkBookmark(database.title).observeOnce(this) { isBookmarked ->
@@ -169,7 +165,6 @@ class DetailActivity : AppCompatActivity() {
         }
         observe(owner, wrapper)
     }
-
 
     private fun showLoading(isLoading: Boolean) {
         binding.progressBar.visibility =
