@@ -40,7 +40,17 @@ class FavoriteFragment : Fragment() {
         viewModel.favoriteNutri.observe(viewLifecycleOwner) { favoriteList ->
             if (favoriteList != null) {
                 val items = favoriteList.map {
-                    RecipeSearchResponseItem(title = it.title, image = it.mediaCover, rating = it.rating)
+                    RecipeSearchResponseItem(
+                        title = it.title,
+                        image = it.mediaCover,
+                        calories = it.calories,
+                        protein = it.protein,
+                        sodium = it.sodium,
+                        fat = it.fat,
+                        directions = it.directions,
+                        rating = it.rating,
+                        desc = it.desc.toString(),
+                        ingredients = it.ingredients)
 
                 }
                 dataList = items
@@ -69,7 +79,14 @@ class FavoriteFragment : Fragment() {
                             RecipeSearchResponseItem(
                                 title = it.title,
                                 image = it.mediaCover,
-                                rating = it.rating
+                                calories = it.calories,
+                                protein = it.protein,
+                                sodium = it.sodium,
+                                fat = it.fat,
+                                directions = it.directions,
+                                rating = it.rating,
+                                desc = it.desc.toString(),
+                                ingredients = it.ingredients
                             )
                         }
                         favoriteAdapter.submitList(items)
@@ -81,7 +98,14 @@ class FavoriteFragment : Fragment() {
                             RecipeSearchResponseItem(
                                 title = it.title,
                                 image = it.mediaCover,
-                                rating = it.rating
+                                calories = it.calories,
+                                protein = it.protein,
+                                sodium = it.sodium,
+                                fat = it.fat,
+                                directions = it.directions,
+                                rating = it.rating,
+                                desc = it.desc.toString(),
+                                ingredients = it.ingredients
                             )
                         }
                         favoriteAdapter.submitList(items)
