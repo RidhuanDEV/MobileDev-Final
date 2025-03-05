@@ -41,6 +41,23 @@ class DetailActivity : AppCompatActivity() {
 
         val nutriItem: RecipeSearchResponseItem? = intent.getParcelableExtra(data)
 
+        // Initialize NutriEntity
+        if (nutriItem != null) {
+            database = NutriEntity(
+                title = nutriItem.title ?: "Data Is Missing!",
+                mediaCover = nutriItem.image ?: "Data Is Missing!",
+                calories = nutriItem.calories ?: 0,
+                protein = nutriItem.protein ?: 0,
+                fat = nutriItem.fat ?: 0,
+                sodium = nutriItem.sodium ?: 0,
+                ingredients = nutriItem.ingredients ?: "Data Is Missing!",
+                directions = nutriItem.directions ?: "Data Is Missing!",
+                desc = nutriItem.desc ?: "Data Is Missing!",
+                rating = nutriItem.rating ?: 0,
+                isBookmarked = true
+            )
+        }
+
         if (nutriItem != null) {
             showLoading(true)
             // Set the dish title
@@ -110,22 +127,6 @@ class DetailActivity : AppCompatActivity() {
             updateBookmarkIcon(database)
         }
 
-        // Initialize NutriEntity
-        if (nutriItem != null) {
-            database = NutriEntity(
-                title = nutriItem.title ?: "Data Is Missing!",
-                mediaCover = nutriItem.image ?: "Data Is Missing!",
-                calories = nutriItem.calories ?: 0,
-                protein = nutriItem.protein ?: 0,
-                fat = nutriItem.fat ?: 0,
-                sodium = nutriItem.sodium ?: 0,
-                ingredients = nutriItem.ingredients ?: "Data Is Missing!",
-                directions = nutriItem.directions ?: "Data Is Missing!",
-                desc = nutriItem.desc ?: "Data Is Missing!",
-                rating = nutriItem.rating ?: 0,
-                isBookmarked = true
-            )
-        }
         viewModel.checkBookmark(database.title.trim()).observe(this) { eventEntity ->
             if (eventEntity != null) {
                 binding.favoriteButton.setImageResource(R.drawable.baseline_favorite_24)
